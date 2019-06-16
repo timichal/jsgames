@@ -8,10 +8,9 @@ function decompress(b64compressed) {
     );
 }
 
-function genImage(b64, svg) {
+function genImage(b64) {
   const img = new Image();
   img.src = `data:image/gif;base64,${decompress(b64)}`;
-  if (svg) img.src = b64;
   return img;
 }
 
