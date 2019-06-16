@@ -3,15 +3,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 100px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 form {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 296px;
+}
+
+#instructions {
+  margin-bottom: 10px;
 }
 
 #gameContainer {
@@ -21,4 +24,12 @@ form {
 canvas {
   transform: scale(2);
   transform-origin: top center;
+}
+
+h1 {
+  margin-bottom: -3px;
+}
+
+.github-link {
+  font-size: x-small;
 }
