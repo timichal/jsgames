@@ -14,8 +14,11 @@ form {
   width: 296px;
 }
 
+#gameContainer {
+  touch-action: manipulation;
+}
+
 canvas {
   transform: scale(2);
   transform-origin: top center;
-  touch-action: manipulation;
 }

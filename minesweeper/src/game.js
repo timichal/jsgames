@@ -16,13 +16,18 @@ export class Game {
       this.maxY = 7;
       this.bombCount = 10;
     } else if (difficulty === "intermediate") {
-      this.maxX = 15;
-      this.maxY = 15;
+      if (isMobile) {
+        this.maxX = 7;
+        this.maxY = 31;
+      } else {
+        this.maxX = 15;
+        this.maxY = 15;
+      }
       this.bombCount = 40;
     } else if (difficulty === "expert") {
       if (isMobile) {
-        this.maxX = 15;
-        this.maxY = 30;
+        this.maxX = 7;
+        this.maxY = 61;
       } else {
         this.maxX = 30;
         this.maxY = 15;
