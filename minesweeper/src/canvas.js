@@ -6,9 +6,14 @@ canvas view for the board
 
 export class Canvas {
   constructor(width, height, maxX, maxY) {
-    this.canvas = document.getElementById("boardCanvas");
+    // needing to destroy the old canvas and create a new one on new game
+    this.container = document.getElementById("gameContainer");
+    this.container.innerHTML = "";
+    this.canvas = document.createElement("canvas");
+    this.canvas.id = "boardCanvas";
     this.canvas.width = width;
     this.canvas.height = height;
+    this.container.appendChild(this.canvas);
     this.ctx = this.canvas.getContext("2d");
     this.clickables = [];
     this.maxX = maxX;
