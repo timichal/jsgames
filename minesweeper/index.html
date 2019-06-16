@@ -1,0 +1,28 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>jsgames :: Minesweeper</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <form>
+    <div>
+      <input type="radio" name="difficulty" id="beginner" value="beginner" checked><label
+        for="beginner">Beginner</label>
+      <input type="radio" name="difficulty" id="intermediate" value="intermediate"><label
+        for="intermediate">Intermediate</label>
+      <input type="radio" name="difficulty" id="expert" value="expert"><label for="expert">Expert</label>
+    </div>
+    <div>
+      <input type="checkbox" name="qmarks" id="qmarks" checked><label for="qmarks">Use question marks</label>
+    </div>
+  </form>
+  <canvas id="boardCanvas"></canvas>
+  <script src="script.js"></script>
+</body>
+
+</html>
