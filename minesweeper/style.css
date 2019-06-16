@@ -15,6 +15,7 @@ form {
 
 #instructions {
   margin-bottom: 10px;
+  max-width: 600px;
 }
 
 #gameContainer {

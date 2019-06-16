@@ -235,10 +235,10 @@ export class Game {
         const tapLength = currentTime - this.lastTap;
         clearTimeout(this.timeout);
         if (tapLength < 300 && tapLength > 0) {
-          this.rightClick(...clickArgs);
+          this.leftClick(...clickArgs);
         } else {
           this.timeout = setTimeout(() => {
-            this.leftClick(...clickArgs);
+            this.rightClick(...clickArgs);
             clearTimeout(this.timeout);
           }, 300);
         }
