@@ -3,6 +3,9 @@ import { Timer } from "./timer";
 import { Board } from "./board";
 import { cellAndNeighbors } from "./helperFunctions";
 
+//const mobile = window.innerWidth < 800;
+const mobile = true;
+
 window.onload = () => {
   // disable the right click button's menu so cells can be right clicked
   function pressRightClick() { return false; }
@@ -265,24 +268,30 @@ window.onload = () => {
     }
   }
 
-  let doubleTap = false;
+  let timeout;
+  let lastTap = 0;
   function handleEvent(id, event) {
-    //console.log(id, event.type);
+    console.log(id, event.type);
     if (id.startsWith("cell")) {
       const clickArgs = [Number(id.split("-")[1]), Number(id.split("-")[2])];
       if (event.type === "mousedown") canvas.drawFace("ooh");
-      if (event.type === "mouseup" && !dead && !win) {
+      if (event.type === "mouseup" && !dead && !win && !mobile) {
         if (event.button === 0) leftClick(...clickArgs);
         if (event.button === 2) rightClick(...clickArgs);
       }
-      if (event.type === "touchstart") {
-        if (!doubleTap) {
-          doubleTap = true;
-          setTimeout(() => { doubleTap = false; }, 300);
-          return false;
+      if (event.type === "touchstart" && !dead && !win) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        clearTimeout(timeout);
+        if (tapLength < 300 && tapLength > 0) {
+          rightClick(...clickArgs);
+        } else {
+          timeout = setTimeout(function () {
+            leftClick(...clickArgs);
+            clearTimeout(timeout);
+          }, 300);
         }
-        event.preventDefault();
-        rightClick(...clickArgs);
+        lastTap = currentTime;
       }
     }
     if (id === "bombcount" && event.type === "click") bombCountClick();

@@ -17,4 +17,5 @@ form {
 canvas {
   transform: scale(2);
   transform-origin: top center;
+  touch-action: manipulation;
 }
