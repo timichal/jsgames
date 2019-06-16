@@ -341,8 +341,7 @@ window.onload = () => {
     height = 46 + (maxY + 1) * 16 + 10;
     canvas.init();
     moves = 0;
-    timer.stop();
-    timer.currentTime = 0;
+    timer.reset();
     makeBoard();
     canvas.drawFace("smile");
     dead = false;

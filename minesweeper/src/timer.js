@@ -1,4 +1,3 @@
-//TODO reset capabilities
 export class Timer {
   constructor(canvas) {
     this.currentTime = 0;
@@ -10,7 +9,7 @@ export class Timer {
     if (this.active && this.currentTime < 1000) {
       this.currentTime += 1;
       this.canvas.drawTimer(this.currentTime);
-      setTimeout(() => this.tick(), 1000);
+      this.timeout = setTimeout(() => this.tick(), 1000);
     }
   }
 
@@ -21,6 +20,12 @@ export class Timer {
 
   stop() {
     this.active = false;
+  }
+
+  reset() {
+    this.stop();
+    this.currentTime = 0;
+    clearTimeout(this.timeout);
   }
 }
 
