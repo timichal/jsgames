@@ -265,23 +265,39 @@ window.onload = () => {
     }
   }
 
+  let doubleTap = false;
   function handleEvent(id, event) {
-    // console.log(id, event.type);
+    //console.log(id, event.type);
     if (id.startsWith("cell")) {
+      const clickArgs = [Number(id.split("-")[1]), Number(id.split("-")[2])];
       if (event.type === "mousedown") canvas.drawFace("ooh");
-      if (event.type === "mouseup") {
-        const clickArgs = [Number(id.split("-")[1]), Number(id.split("-")[2]), event];
+      if (event.type === "mouseup" && !dead && !win) {
         if (event.button === 0) leftClick(...clickArgs);
         if (event.button === 2) rightClick(...clickArgs);
+      }
+      if (event.type === "touchstart") {
+        if (!doubleTap) {
+          doubleTap = true;
+          setTimeout(() => { doubleTap = false; }, 300);
+          return false;
+        }
+        event.preventDefault();
+        rightClick(...clickArgs);
       }
     }
     if (id === "bombcount" && event.type === "click") bombCountClick();
     if (id === "face" && event.type === "click") initGame();
   }
 
-
-  ["click", "mousedown", "mouseup"].forEach((event) => {
+  ["click", "mousedown", "mouseup", "touchstart"].forEach((event) => {
     canvas.canvas.addEventListener(event, (e) => {
+      // coords for double tap
+      if (event === "touchstart") {
+        const rect = e.target.getBoundingClientRect();
+        e.offsetX = Math.round((e.targetTouches[0].pageX - rect.left) / 2);
+        e.offsetY = Math.round((e.targetTouches[0].pageY - rect.top) / 2);
+      }
+
       const clickPos = { x: e.offsetX, y: e.offsetY };
       canvas.clickables.forEach((clickable) => {
         if (
