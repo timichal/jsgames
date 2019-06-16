@@ -309,10 +309,10 @@ window.onload = () => {
       // coords for double tap
       if (event === "touchstart") {
         const rect = e.target.getBoundingClientRect();
-        e.offsetX = Math.round((e.targetTouches[0].pageX - rect.left) / 2);
-        e.offsetY = Math.round((e.targetTouches[0].pageY - rect.top) / 2);
+        e.offsetX = Math.round((e.targetTouches[0].pageX - rect.left - window.scrollX) / 2);
+        e.offsetY = Math.round((e.targetTouches[0].pageY - rect.top - window.scrollY) / 2);
       }
-
+      document.getElementById("console").innerHTML += [event, e.offsetX, e.offsetY] + "<br>";
       const clickPos = { x: e.offsetX, y: e.offsetY };
       canvas.clickables.forEach((clickable) => {
         if (
