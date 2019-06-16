@@ -3,8 +3,14 @@ import { Timer } from "./timer";
 import { Board } from "./board";
 import { cellAndNeighbors } from "./helperFunctions";
 
-//const mobile = window.innerWidth < 800;
-const mobile = true;
+const mobile = (navigator.userAgent.match(/Android/i)
+|| navigator.userAgent.match(/webOS/i)
+|| navigator.userAgent.match(/iPhone/i)
+|| navigator.userAgent.match(/iPad/i)
+|| navigator.userAgent.match(/iPod/i)
+|| navigator.userAgent.match(/BlackBerry/i)
+|| navigator.userAgent.match(/Windows Phone/i)) && true;
+//const mobile = true;
 
 window.onload = () => {
   // disable the right click button's menu so cells can be right clicked
@@ -271,10 +277,10 @@ window.onload = () => {
   let timeout;
   let lastTap = 0;
   function handleEvent(id, event) {
-    console.log(id, event.type);
+    //console.log(id, event.type);
     if (id.startsWith("cell")) {
       const clickArgs = [Number(id.split("-")[1]), Number(id.split("-")[2])];
-      if (event.type === "mousedown") canvas.drawFace("ooh");
+      if (event.type === "mousedown" && !mobile) canvas.drawFace("ooh");
       if (event.type === "mouseup" && !dead && !win && !mobile) {
         if (event.button === 0) leftClick(...clickArgs);
         if (event.button === 2) rightClick(...clickArgs);
