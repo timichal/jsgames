@@ -20,8 +20,13 @@ export class Game {
       this.maxY = 15;
       this.bombCount = 40;
     } else if (difficulty === "expert") {
-      this.maxX = 30;
-      this.maxY = 15;
+      if (isMobile) {
+        this.maxX = 15;
+        this.maxY = 30;
+      } else {
+        this.maxX = 30;
+        this.maxY = 15;
+      }
       this.bombCount = 99;
     }
 
