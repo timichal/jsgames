@@ -148,7 +148,7 @@ export class Game {
     matrix.forEach((neighbor) => {
       const cell = board.board[neighbor[0]][neighbor[1]];
       if (cell.isBomb) {
-        board.removeBomb(neighbor[0], neighbor[1]);
+        board.placeBomb(neighbor[0], neighbor[1], true);
         for (; ;) {
           const newBomb = board.shuffledPosList[this.bombCount + newBombPos];
           const conflicts = matrix
@@ -278,14 +278,15 @@ export class Game {
 
   // preparing the game board
   makeBoard() {
-    this.board.init();
+    const { board } = this;
+    board.init();
     this.bombsFlagged = 0;
     this.cellsOpen = 0;
     this.updateBombCount();
     // placing the bombs on the board
-    this.board.shuffledPosList
+    board.shuffledPosList
       .slice(0, this.bombCount)
-      .forEach(pos => this.board.placeBomb(pos[0], pos[1]));
+      .forEach(pos => board.placeBomb(pos[0], pos[1]));
   }
 
   // initiating procedure

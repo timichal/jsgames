@@ -41,30 +41,18 @@ export class Board {
       .reduce((acc, val) => acc + val);
   }
 
-  // Places a bomb into a cell.
-  // returns true if bomb placed successfully, false if not
+  // Places a bomb into a cell (with an optional remove parameter)
   // TODO how does the neighborBombs thing work when it increases the cell itself's count as well?
-  placeBomb(x, y) {
+  placeBomb(x, y, remove) {
     const cell = this.board[x][y];
-    if (!cell.isBomb) {
-      cell.isBomb = true;
-
-      cellAndNeighbors(x, y)
-        .filter(neighbor => this.boundCheck(neighbor[0], neighbor[1]))
-        .forEach((neighbor) => { this.board[neighbor[0]][neighbor[1]].neighborBombs += 1; });
-
-      return true;
-    }
-    return false;
-  }
-
-  removeBomb(x, y) {
-    const cell = this.board[x][y];
-    cell.isBomb = false;
+    const neighborBombModifier = remove ? -1 : 1;
+    cell.isBomb = !cell.isBomb;
 
     cellAndNeighbors(x, y)
       .filter(neighbor => this.boundCheck(neighbor[0], neighbor[1]))
-      .forEach((neighbor) => { this.board[neighbor[0]][neighbor[1]].neighborBombs -= 1; });
+      .forEach((neighbor) => {
+        this.board[neighbor[0]][neighbor[1]].neighborBombs += neighborBombModifier;
+      });
   }
 }
 
