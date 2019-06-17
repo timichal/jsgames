@@ -24,8 +24,8 @@ export class Board {
     this.board = new Array(this.maxX + 1).fill(0).map(
       () => new Array(this.maxY + 1).fill(0).map(() => new Cell()),
     );
-    this.shuffledPosList = shuffledPosList(this.maxX, this.maxY); // to pick bomb placements from
-    console.log(this.shuffledPosList)
+    // we pick bomb placements from this; also servers as a general list of board positions
+    this.shuffledPosList = shuffledPosList(this.maxX, this.maxY);
   }
 
   // used for looking around a cell
@@ -41,13 +41,12 @@ export class Board {
       .reduce((acc, val) => acc + val);
   }
 
-  // Places a bomb into a cell. isExposed is used here as a temporary
-  // measure for firstClick()
+  // Places a bomb into a cell.
   // returns true if bomb placed successfully, false if not
   // TODO how does the neighborBombs thing work when it increases the cell itself's count as well?
   placeBomb(x, y) {
     const cell = this.board[x][y];
-    if (!cell.isBomb && !cell.isExposed) {
+    if (!cell.isBomb) {
       cell.isBomb = true;
 
       cellAndNeighbors(x, y)

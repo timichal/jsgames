@@ -140,44 +140,42 @@ export class Game {
   // first click: starts the timer, ensures a safe start
   firstClick(x, y) {
     const { board, timer } = this;
-    // we use isExposed as bomb placement prevention
-    // then remove bombs from around the first click and replace them
-    let newBombPos = 0;
     const matrix = cellAndNeighbors(x, y)
       .filter(neighbor => board.boundCheck(neighbor[0], neighbor[1]));
-    matrix
-      .forEach((neighbor) => {
-        const cell = board.board[neighbor[0]][neighbor[1]];
-        cell.isExposed = true;
-        if (cell.isBomb) {
-          board.removeBomb(neighbor[0], neighbor[1]);
-          for (;;) {
-            newBombPos += 1;
-            const newBomb = board.shuffledPosList[this.bombCount + newBombPos];
-            const conflicts = matrix
-              .filter(checkPos => newBomb[0] === checkPos[0] && newBomb[1] === checkPos[1]);
-            if (conflicts.length === 0) {
-              board.placeBomb(newBomb[0], newBomb[1]);
-              break;
-            }
+    let newBombPos = 0;
+
+    // we remove bombs from around the first click and replace them
+    matrix.forEach((neighbor) => {
+      const cell = board.board[neighbor[0]][neighbor[1]];
+      if (cell.isBomb) {
+        board.removeBomb(neighbor[0], neighbor[1]);
+        for (; ;) {
+          const newBomb = board.shuffledPosList[this.bombCount + newBombPos];
+          const conflicts = matrix
+            .filter(checkPos => newBomb[0] === checkPos[0] && newBomb[1] === checkPos[1]);
+          newBombPos += 1;
+          if (conflicts.length === 0) {
+            board.placeBomb(newBomb[0], newBomb[1]);
+            break;
           }
         }
-        cell.isExposed = false;
-      });
+      }
+    });
     timer.start();
   }
 
   // left click function for uncovering cells
   leftClick(x, y) {
-    const cell = this.board.board[x][y];
+    const { board, canvas, timer } = this;
+    const cell = board.board[x][y];
 
     // special case for the first click
-    if (!this.timer.active) this.firstClick(x, y);
+    if (!timer.active) this.firstClick(x, y);
 
     // if clicking an uncovered cell, uncover neighbors if deemed safe
     // if not, uncover the cell
     if (cell.isExposed) {
-      if (this.board.flagsInMatrix(x, y) === this.board.board[x][y].neighborBombs) {
+      if (board.flagsInMatrix(x, y) === board.board[x][y].neighborBombs) {
         this.uncoverMatrix(x, y);
       }
     } else if (!cell.isFlagged) this.uncoverCell(x, y);
@@ -188,7 +186,7 @@ export class Game {
     }
 
     if (!this.dead && !this.win) {
-      this.canvas.drawFace("smile");
+      canvas.drawFace("smile");
       // Count the moves
       this.moves += 1;
     }
@@ -196,24 +194,26 @@ export class Game {
 
   // right click function for cycling states
   rightClick(x, y) {
-    const cell = this.board.board[x][y];
+    const { board, canvas } = this;
+    const cell = board.board[x][y];
+
     if (!cell.isExposed) {
       // three possible states: flagged, question, blank
       if (cell.isFlagged) {
         this.bombsFlagged -= 1;
         cell.isFlagged = false;
-        if (!this.useQuestionMarks) this.canvas.drawCell(x, y, "blank");
+        if (!this.useQuestionMarks) canvas.drawCell(x, y, "blank");
         else {
           cell.isQuestion = true;
-          this.canvas.drawCell(x, y, "bombquestion");
+          canvas.drawCell(x, y, "bombquestion");
         }
       } else if (cell.isQuestion) {
         cell.isQuestion = false;
-        this.canvas.drawCell(x, y, "blank");
+        canvas.drawCell(x, y, "blank");
       } else {
         cell.isFlagged = true;
         this.bombsFlagged += 1;
-        this.canvas.drawCell(x, y, "bombflagged");
+        canvas.drawCell(x, y, "bombflagged");
       }
     }
     this.updateBombCount();
@@ -307,25 +307,23 @@ export class Game {
   // clicking on the bomb count reveals all cells when all flags are used
   // TODO this is a confusing alternate way to win
   bombCountClick() {
-    const { maxX, maxY, board, canvas } = this;
+    const { board, canvas, timer } = this;
     function openAll() {
-      // TODO foreach
       let allOK = true;
-      for (let i = 0; i <= maxX; i++) {
-        for (let j = 0; j <= maxY; j++) {
-          const cell = board.board[i][j];
-          if (!cell.isExposed) {
-            if (cell.isBomb && !cell.isFlagged) {
-              canvas.drawCell(i, j, "bombdeath");
-              allOK = false;
-            } else if (!cell.isBomb && cell.isFlagged) {
-              canvas.drawCell(i, j, "bombmisflagged");
-            } else if (!cell.isBomb) {
-              canvas.drawCell(i, j, `open${cell.neighborBombs}`);
-            }
+      board.shuffledPosList.forEach((pos) => {
+        const cell = board.board[pos[0]][pos[1]];
+        if (!cell.isExposed) {
+          if (cell.isBomb && !cell.isFlagged) {
+            canvas.drawCell(pos[0], pos[1], "bombdeath");
+            allOK = false;
+          } else if (!cell.isBomb && cell.isFlagged) {
+            canvas.drawCell(pos[0], pos[1], "bombmisflagged");
+          } else if (!cell.isBomb) {
+            canvas.drawCell(pos[0], pos[1], `open${cell.neighborBombs}`);
           }
         }
-      }
+      });
+
       return allOK;
     }
 
@@ -334,7 +332,7 @@ export class Game {
       this.moves += 1;
       if (openAll()) {
         this.updateBombCount();
-        console.log(`Victory! ${this.timer.currentTime} time, ${this.moves} moves`);
+        console.log(`Victory! ${timer.currentTime} time, ${this.moves} moves`);
         this.canvas.drawFace("win");
       } else {
         this.dead = true;
