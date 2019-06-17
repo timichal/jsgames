@@ -25,6 +25,7 @@ export class Board {
       () => new Array(this.maxY + 1).fill(0).map(() => new Cell()),
     );
     this.shuffledPosList = shuffledPosList(this.maxX, this.maxY); // to pick bomb placements from
+    console.log(this.shuffledPosList)
   }
 
   // used for looking around a cell

@@ -79,18 +79,19 @@ export class Game {
   }
 
   uncoverCell(x, y) {
-    const cell = this.board.board[x][y];
+    const { board, canvas, timer } = this;
+    const cell = board.board[x][y];
     // game over
     if (cell.isBomb) {
-      this.timer.stop();
-      this.canvas.drawCell(x, y, "bombdeath");
-      this.canvas.drawFace("dead");
+      timer.stop();
+      canvas.drawCell(x, y, "bombdeath");
+      canvas.drawFace("dead");
       cell.isExposed = true;
       this.dead = true;
       this.updateBombCount();
       this.showBombs();
     } else {
-      this.canvas.drawCell(x, y, `open${cell.neighborBombs}`);
+      canvas.drawCell(x, y, `open${cell.neighborBombs}`);
       cell.isExposed = true;
       this.cellsOpen += 1;
       if (cell.neighborBombs === 0 && !cell.isBomb) {
@@ -98,7 +99,7 @@ export class Game {
       }
       // victory check
       if (this.cellsOpen + this.bombCount - 1 === this.maxCells) {
-        this.timer.stop();
+        timer.stop();
         this.win = true;
         this.finishGame();
       }
@@ -106,60 +107,64 @@ export class Game {
   }
 
   // upon dying, show all bombs
-  // TODO foreach
   showBombs() {
-    for (let i = 0; i <= this.maxX; i++) {
-      for (let j = 0; j <= this.maxY; j++) {
-        const cell = this.board.board[i][j];
-
-        if (!cell.isExposed) {
-          if (cell.isBomb && !cell.isFlagged) {
-            this.canvas.drawCell(i, j, "bombrevealed");
-          } else if (!cell.isBomb && cell.isFlagged) {
-            this.canvas.drawCell(i, j, "bombmisflagged");
-          }
+    const { board, canvas } = this;
+    board.shuffledPosList.forEach((pos) => {
+      const cell = board.board[pos[0]][pos[1]];
+      if (!cell.isExposed) {
+        if (cell.isBomb && !cell.isFlagged) {
+          canvas.drawCell(pos[0], pos[1], "bombrevealed");
+        } else if (!cell.isBomb && cell.isFlagged) {
+          canvas.drawCell(pos[0], pos[1], "bombmisflagged");
         }
       }
-    }
+    });
   }
 
+
   // when there are no bombs left, flag unflagged cells
-  // TODO foreach
   finishGame() {
-    for (let i = 0; i <= this.maxX; i++) {
-      for (let j = 0; j <= this.maxY; j++) {
-        const cell = this.board.board[i][j];
-        if (!cell.isExposed && !cell.isFlagged) {
-          cell.isFlagged = true;
-          this.canvas.drawCell(i, j, "bombflagged");
-        }
+    const { board, canvas, timer } = this;
+    board.shuffledPosList.forEach((pos) => {
+      const cell = board.board[pos[0]][pos[1]];
+      if (!cell.isExposed && !cell.isFlagged) {
+        cell.isFlagged = true;
+        canvas.drawCell(pos[0], pos[1], "bombflagged");
       }
-    }
+    });
     this.win = true;
-    console.log(`Victory! ${this.timer.currentTime} time, ${this.moves} moves`);
-    this.canvas.drawFace("win");
+    console.log(`Victory! ${timer.currentTime} time, ${this.moves} moves`);
+    canvas.drawFace("win");
   }
 
   // first click: starts the timer, ensures a safe start
-  // TODO sometimes matrix opening doesn't work
   firstClick(x, y) {
+    const { board, timer } = this;
     // we use isExposed as bomb placement prevention
     // then remove bombs from around the first click and replace them
-    let removedBombs = 0;
-    cellAndNeighbors(x, y)
-      .filter(neighbor => this.board.boundCheck(neighbor[0], neighbor[1]))
+    let newBombPos = 0;
+    const matrix = cellAndNeighbors(x, y)
+      .filter(neighbor => board.boundCheck(neighbor[0], neighbor[1]));
+    matrix
       .forEach((neighbor) => {
-        const cell = this.board.board[neighbor[0]][neighbor[1]];
+        const cell = board.board[neighbor[0]][neighbor[1]];
         cell.isExposed = true;
         if (cell.isBomb) {
-          this.board.removeBomb(neighbor[0], neighbor[1]);
-          removedBombs += 1;
-          const newBomb = this.board.shuffledPosList[this.bombCount + removedBombs];
-          this.board.placeBomb(newBomb[0], newBomb[1]);
+          board.removeBomb(neighbor[0], neighbor[1]);
+          for (;;) {
+            newBombPos += 1;
+            const newBomb = board.shuffledPosList[this.bombCount + newBombPos];
+            const conflicts = matrix
+              .filter(checkPos => newBomb[0] === checkPos[0] && newBomb[1] === checkPos[1]);
+            if (conflicts.length === 0) {
+              board.placeBomb(newBomb[0], newBomb[1]);
+              break;
+            }
+          }
         }
         cell.isExposed = false;
       });
-    this.timer.start();
+    timer.start();
   }
 
   // left click function for uncovering cells
@@ -223,6 +228,7 @@ export class Game {
 
   handleEvent(id, event) {
     // console.log(id, event.type);
+    // TODO: single tap reveal
     if (id.startsWith("cell")) {
       const clickArgs = [Number(id.split("-")[1]), Number(id.split("-")[2])];
       if (event.type === "mousedown" && !isMobile) this.canvas.drawFace("ooh");
